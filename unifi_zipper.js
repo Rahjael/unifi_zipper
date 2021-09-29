@@ -43,7 +43,7 @@ const DATA = {
  * 
  * @param {String} path - the path the file belongs to
  * @param {String} name - the name of the file to process
- * @param {Array} tags - an array of Strings reprenting available tags
+ * @param {Array} tags - an array of Strings representing available tags
  */
 function getZippedName(path, name, tags) {
   let zippedName = '';
@@ -122,11 +122,13 @@ async function zipAll(array) {
       )
   }
 
-  
 
 
 
-
+    
+    //
+    //  This is the original attempt which closely followed jsZIP's documentation
+    //
 
     // zip.generateNodeStream({type: 'nodebuffer', streamFiles: true})
     //   .pipe(fs.createWriteStream(item.zippedName))
