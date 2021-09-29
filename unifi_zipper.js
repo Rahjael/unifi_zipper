@@ -2,7 +2,6 @@ const fs = require('fs');
 
 // This has been downloaded from https://www.npmjs.com/package/jszip
 const jszip = require('./jszip');
-const zip = new jszip();
 
 
 // This whole block is to promisify the pipeline (so i can make it wait at every iteration)
@@ -22,9 +21,7 @@ const CONFIG = {
     ], // ignore during processing
 
     tags: [
-      'anaMat1',
-      'fis1',
-      'geomAlgLin'
+      'string'
     ], // keys to use when renaming files (these are highly dependant on how the unifi-webex-dl tool is configured)
     
     // These should probably be left alone
@@ -114,20 +111,21 @@ async function zipAll(array) {
       console.log(item.zippedName, 'already processed, skipping.');
       continue;
     }
-    else {
-      processedThisSession.push(item.zippedName);
-    }
+
+    
+    const zip = new jszip();
     
     zip.file(item.name, fs.readFileSync(item.path + item.name)),
     
     await promisifiedPipeline(
       zip.generateNodeStream({type: 'nodebuffer', streamFiles: true}),
-      fs.createWriteStream(item.zippedName),  
+      fs.createWriteStream(item.zippedName)
     )
     .then( () => {
-      console.log(item.zippedName, 'created.');    
+      console.log(item.zippedName, 'created.');
       fs.renameSync(item.zippedName, CONFIG.destinationPath + item.zippedName);
       console.log(item.zippedName, "moved to zipped folder.");
+      processedThisSession.push(item.zippedName);
     });
   }
     console.log("Processed this session: \n", processedThisSession);
