@@ -24,7 +24,7 @@ const CONFIG = {
     tags: [
       'anaMat1',
       'fis1',
-      'ingSoftware'
+      'geomAlgLin'
     ], // keys to use when renaming files (these are highly dependant on how the unifi-webex-dl tool is configured)
     
     // These should probably be left alone
@@ -98,11 +98,24 @@ function recursivelyListFiles(startPath, array) {
  * Zips every file in the array
  * @param {Array} array - an array of items: {path: string, name: string, zippedName: string}
  */
+
 async function zipAll(array) {
+  let processedThisSession = [];
+
+  // Get list of files in output directory, will be useful to skip already processed files
+  let inOutputFolder = fs.readdirSync(CONFIG.destinationPath);
+
   for(const item of array) {
     if(item.zippedName === '') {
       console.log('WARNING: property zippedName is empty, file will not be processed:', item.name);
-      return;
+      continue;
+    }
+    if(inOutputFolder.includes(item.zippedName)) {
+      console.log(item.zippedName, 'already processed, skipping.');
+      continue;
+    }
+    else {
+      processedThisSession.push(item.zippedName);
     }
     
     zip.file(item.name, fs.readFileSync(item.path + item.name)),
@@ -113,22 +126,22 @@ async function zipAll(array) {
     )
     .then( () => {
       console.log(item.zippedName, 'created.');    
-      fs.rename(item.zippedName, CONFIG.destinationPath + item.zippedName, (err) => {
-        if(err) console.log(err);
-        else console.log(item.zippedName, "moved to zipped folder.");
-      });
-      },
-        (err) => console.log(err)
-      )
+      fs.renameSync(item.zippedName, CONFIG.destinationPath + item.zippedName);
+      console.log(item.zippedName, "moved to zipped folder.");
+    });
   }
+    console.log("Processed this session: \n", processedThisSession);
+
+
 
 
 
 
     
     //
-    //  This is the original attempt which closely followed jsZIP's documentation
+    //  Following is the original attempt which closely followed jsZIP's documentation. I then refactored everything trying to handle the stream as a synchronously
     //
+
 
     // zip.generateNodeStream({type: 'nodebuffer', streamFiles: true})
     //   .pipe(fs.createWriteStream(item.zippedName))
@@ -156,4 +169,4 @@ async function zipAll(array) {
 
 
 
-zipAll(DATA.items).catch(console.error);
+zipAll(DATA.items);
