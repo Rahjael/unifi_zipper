@@ -46,7 +46,9 @@ function getZippedName(path, name, tags) {
   let zippedName = '';
 
   // Fetch timestamp info from webex naming convention
-  let fileDate = name.match(CONFIG.webexTimestampRegex)[0];
+  let match = name.match(CONFIG.webexTimestampRegex);
+  if(!match) return zippedName;
+  let fileDate = match[0];
 
   // Rename files only if a proper tag is found
   tags.forEach( tag => {
